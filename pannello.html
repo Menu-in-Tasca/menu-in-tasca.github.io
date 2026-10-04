@@ -250,6 +250,7 @@ async function chiama(azione, extra, zitto){
 const WA = '393884064295';
 let PIANO = 'Premium';
 const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
+function demo_base(){ return null; }
 function account(d){
   PIANO = d.piano || PIANO; const loc = d.locale || $('loc').textContent, base = PIANO === 'Base';
   document.body.classList.toggle('base', base);
@@ -259,16 +260,18 @@ function account(d){
       ${d.foglio ? `<div class="aiuto"><a href="${esc(d.foglio)}" target="_blank" rel="noopener"><span>📄 Apri il foglio Google</span><small>solo per voi</small></a></div>` : ''}`;
     $('account').hidden = false; return;
   }
+  const bi = d.base || (demo_base()), rim = bi ? Math.max(0, (bi.incluse || 3) - (bi.usate || 0)) : null, vicino = bi && typeof bi.giorni === 'number' && bi.giorni <= 30;
   const voci = base ? [
-      ['✏️ Richiedi una modifica', '50 €', `Ciao, sono ${loc}. Vorrei modificare il menu: `],
+      ['✏️ Richiedi una modifica', rim === null ? '3 l\'anno incluse, poi 50 €' : rim > 0 ? `inclusa · ne restano ${rim} su ${bi.incluse || 3}` : '50 € (le 3 incluse sono finite)', `Ciao, sono ${loc}. Vorrei modificare il menu: `],
       ['🗓️ Rifare menu e grafica per il nuovo anno', '100 €', `Ciao, sono ${loc}. Vorrei rifare menu e grafica per il nuovo anno.`],
+      ...(vicino ? [['🔁 Rinnova il servizio per un altro anno', '250 €', `Ciao, sono ${loc}. Vorrei rinnovare il servizio per un altro anno.`]] : []),
       ['⭐ Passa al Premium e cambialo da solo', '100 € + 35 €/mese', `Ciao, sono ${loc}. Vorrei passare al Premium.`]]
     : [['🛠️ Qualcosa non funziona', 'gratis', `Ciao, sono ${loc}. C'è un problema con il menu: `],
       ['✏️ Chiedi a noi una modifica', '30 €', `Ciao, sono ${loc}. Mi fate questa modifica al menu? `],
       ['🗓️ Menu e grafica nuovi per l\'anno', 'gratis 1 volta l\'anno', `Ciao, sono ${loc}. Vorrei rifare menu e grafica per la nuova stagione.`]];
   $('account').innerHTML = `<span class="piano">${esc(PIANO.toUpperCase())}</span>
     <h2>${base ? 'Il tuo menu lo aggiorniamo noi' : 'Il tuo menu lo cambi tu, qui sotto'}</h2>
-    <p class="hint" style="margin:0">${base ? 'Qui vedi il tuo menu e le statistiche. Per cambiare qualcosa, scrivici con un tocco.' : 'Tocca un piatto per cambiarlo. Se ti serve una mano, siamo qui.'}</p>
+    <p class="hint" style="margin:0">${base ? 'Qui vedi il tuo menu e le statistiche. Per cambiare qualcosa, scrivici con un tocco.' + (bi && bi.scade ? ` <b>Il servizio è attivo fino al ${esc(bi.scade)}</b>${vicino ? ' (a breve scade: puoi rinnovarlo qui sotto).' : '.'}` : '') : 'Tocca un piatto per cambiarlo. Se ti serve una mano, siamo qui.'}</p>
     <div class="aiuto">${voci.map(([t, c, m]) => `<a href="${wa(m)}" target="_blank" rel="noopener"><span>${t}</span><small>${esc(c)}</small></a>`).join('')}</div>`;
   $('account').hidden = false;
 }
